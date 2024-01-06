@@ -1,0 +1,112 @@
+(load "./kda-env/init.repl")
+(load "../KU/oracle/price.repl")
+
+(print "We made it through loading")
+
+(begin-tx)
+(env-keys ["ku-admin" "ku-bank"])
+(env-data
+    {
+          "ku-admin": {
+            "keys": [
+              "ku-admin"
+            ],
+            "pred": "keys-any"
+          },
+          "ku-bank": {
+            "keys": [
+              "ku-bank"
+            ],
+            "pred": "keys-all"
+          },
+                   "upgrade": false
+  }
+    )
+(commit-tx)
+
+(begin-tx)
+(load "./kadenai-credits.pact")
+(commit-tx)
+
+(begin-tx "Add Bank Account")
+(env-keys ["ku-admin"])
+(coin.create-account "KAIBANK" (read-keyset "ku-bank"))
+(free.kadenai-credits.update-bank "BANK" "KAIBANK")
+ (commit-tx)
+
+
+(begin-tx "create-name-id")
+(env-keys ["bob-key"])
+(env-data {
+    "bob": {
+        "keys": [
+            "bob-key"
+          ],
+          "pred": "keys-any"
+    }
+  })
+(env-sigs
+    [{
+        "key": "bob-key",
+        "caps": [(coin.TRANSFER "bob" "KAIBANK" 10.0),
+                (free.kadenai-credits.ENFORCE-PAYER)
+    ]
+    }]
+    )
+(env-gasmodel "table") (env-gaslimit 150000) (env-gas 0) 
+(free.kadenai-credits.create-payment "bob" (read-keyset 'bob) 5)
+(env-gas)
+
+(free.kadenai-credits.get-payment-info "Tf-xOa79e1WphqdDYJni2Sqr9e80ut6udCaZmC9Wah8")
+(env-gas)
+
+(expect-that "Amounts after create"
+ (= [992.9 7.1])
+ [
+    (coin.get-balance "bob")
+    (coin.get-balance "KAIBANK")
+ ]
+)
+
+(commit-tx)
+
+
+(begin-tx "bobs second tx")
+(env-keys ["bob-key"])
+(env-chain-data { "block-time": (time "2023-01-03T20:00:00Z")})
+
+(env-data {
+    "bob": {
+        "keys": [
+            "bob-key"
+          ],
+          "pred": "keys-any"
+    }
+   })
+(env-sigs
+    [{
+        "key": "bob-key",
+        "caps": [(coin.TRANSFER "bob" "KAIBANK" 95.0),
+                (free.kadenai-credits.ENFORCE-PAYER)
+    ]
+    }]
+    )
+(env-gasmodel "table") (env-gaslimit 150000) (env-gas 0) 
+(free.kadenai-credits.create-payment "bob" (read-keyset 'bob) 20)
+(env-gas)
+
+;  (free.kadenai-credits.get-payment-info "b9m5kq81ylW9jl9hgXhf_RoDsr2VQFWS3r3oYZ1hHL4")
+(env-gas)
+
+(expect-that "Amounts after create"
+ (= [988.0 12.0])
+ [
+    (coin.get-balance "bob")
+    (coin.get-balance "KAIBANK")
+ ]
+)
+
+(free.kadenai-credits.get-credits)
+(commit-tx)
+
+
