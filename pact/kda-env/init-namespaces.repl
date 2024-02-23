@@ -7,6 +7,7 @@
 (define-namespace 'kip GUARD_SUCCESS GUARD_SUCCESS)
 (define-namespace 'user GUARD_SUCCESS GUARD_SUCCESS)
 (define-namespace 'marmalade GUARD_SUCCESS GUARD_SUCCESS)
+(define-namespace 'n_5acb461c9fbeeb67c0359feaf8f54aafa8605aee GUARD_SUCCESS GUARD_SUCCESS)
 
 (print "Standard namespaces initialized")
 (commit-tx)

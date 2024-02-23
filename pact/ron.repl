@@ -1,0 +1,37 @@
+(load "./kda-env/init.repl")
+(begin-tx "Load stuffs")
+(env-data {
+    "ron-key": {
+        "keys": ["c11f2c18e3e91333d1d6fbcddbb22b3729cefbc78206b880a2eb926b65a80d85"],
+        "pred": "keys-all"
+    },
+    "upgrade": false
+})
+(env-keys ["c11f2c18e3e91333d1d6fbcddbb22b3729cefbc78206b880a2eb926b65a80d85"])
+(load "./ron.pact")
+(commit-tx)
+
+(begin-tx "Test this mutha")
+(env-keys ["76821f628c5d257ee32b9f4527490fd41847cb9267c6ba5611d7981616e4ed17"])
+(env-sigs
+    [{
+      "key": "76821f628c5d257ee32b9f4527490fd41847cb9267c6ba5611d7981616e4ed17",
+      "caps": [
+          (coin.TRANSFER "k:76821f628c5d257ee32b9f4527490fd41847cb9267c6ba5611d7981616e4ed17" (n_5acb461c9fbeeb67c0359feaf8f54aafa8605aee.WIZA-Clan-Payments.get-sendy) 10.0)
+      ]
+    }])
+(use n_5acb461c9fbeeb67c0359feaf8f54aafa8605aee.WIZA-Clan-Payments)
+(pay 10.0)
+
+(expect-that "Amounts were transferred"
+  (= [990.0 1002.5 1002.5 1002.5 1002.5])
+  [
+    (coin.get-balance "k:76821f628c5d257ee32b9f4527490fd41847cb9267c6ba5611d7981616e4ed17")
+    (coin.get-balance "k:6a599963c2dc099c6ef90dfa9788c8a226771edb38b3d6755c406c64d400f706")
+    (coin.get-balance "k:92e4864f47b0e0dcb4b84549309f854a16fc2256a7a534ad3b68a3c15a330cc2")
+    (coin.get-balance "k:1b1a56a7aaa9531cba7a75301446d54ecbe94138031be34b52a776f25b047241")
+    (coin.get-balance "k:0cd597317a5bfde541f3a68e38e2a6b4b1df2f3640963715908a689672ebe0eb")
+  ]
+)
+
+(commit-tx)
